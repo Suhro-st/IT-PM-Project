@@ -35,7 +35,7 @@ $result = mysqli_query(
             <a href="profile.php">Profil</a>
 
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                <a href="admin.php">Admin</a>
+                <a href="admin/dashboard.php">Admin</a>
             <?php endif; ?>
 
             <a href="logout.php">Logout</a>
