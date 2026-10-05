@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "koneksi.php";
+require_once __DIR__ . "/../koneksi.php";
 
 if (
     !isset($_SESSION['user_id']) ||
@@ -93,17 +93,21 @@ $orders = mysqli_query(
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Data</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Jasa</title>
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
 
+
 <header>
-    <div class="logo">Kelola E-Commerce Jasa</div>
+    <div class="logo">E-Commerce Jasa Kampus</div>
+
     <nav>
-        <a href="index.php">Beranda</a>
-        <a href="admin.php">Dashboard</a>
-        <a href="logout.php">Logout</a>
+        <a href="../index.php">Beranda</a>
+        <a href="dashboard.php">Dashboard</a>
+        <a href="manage.php">Kelola Jasa</a>
+        <a href="../logout.php">Logout</a>
     </nav>
 </header>
 
