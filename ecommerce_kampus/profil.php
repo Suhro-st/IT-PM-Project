@@ -10,7 +10,8 @@ if (!isset($_SESSION['user_id'])) {
 $stmt = mysqli_prepare(
     $conn,
     "SELECT nama, email, role, created_at
-     FROM users WHERE id = ?"
+     FROM users
+     WHERE id = ?"
 );
 
 mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
