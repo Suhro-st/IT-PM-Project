@@ -91,6 +91,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Pembayaran Pesanan</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<script>
+function tampilkanPembayaran() {
+    const metode = document.getElementById("metode");
+    const qrisBox = document.getElementById("qris-box");
+
+    if (metode.value === "E-Wallet") {
+        qrisBox.style.display = "block";
+    } else {
+        qrisBox.style.display = "none";
+    }
+}
+</script>
 <body>
 
 <div class="form-container">
@@ -130,12 +142,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <label for="metode">Metode Pembayaran</label>
 
-            <select name="metode" id="metode" required>
-                <option value="">Pilih Metode Pembayaran</option>
-                <option value="Transfer Bank">Transfer Bank</option>
-                <option value="E-Wallet">E-Wallet</option>
-                <option value="Tunai">Tunai</option>
-            </select>
+          <select name="metode" id="metode" required onchange="tampilkanPembayaran()">
+    <option value="">Pilih Metode Pembayaran Anda</option>
+    <option value="E-Wallet">E-Wallet / QRIS</option>
+    <option value="Tunai">Tunai</option>
+</select>
+
+<div id="qris-box" style="display:none; text-align:center; margin-top:20px;">
+
+    <h3>Pembayaran E-Wallet / QRIS</h3>
+
+    <p>Silakan scan QRIS berikut untuk melakukan pembayaran.</p>
+<img 
+    src="./images/qris.jpg" 
+    alt="QRIS Pembayaran"
+    style="width:250px; max-width:100%;"
+>
+
+    <p>
+        Setelah melakukan pembayaran, klik
+        <strong>Konfirmasi Pembayaran</strong>.
+    </p>
+
+</div>
 
             <button type="submit" class="btn full">
                 Konfirmasi Pembayaran
