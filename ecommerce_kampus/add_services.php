@@ -1,49 +1,59 @@
 <?php
 session_start();
-require_once "koneksi.php";
+require_once __DIR__ . "/../koneksi.php";
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+// Cek apakah yang login adalah admin
+if (
+    !isset($_SESSION['user_id']) ||
+    !isset($_SESSION['role']) ||
+    $_SESSION['role'] !== 'admin'
+) {
+    header("Location: ../login_admin.php");
     exit;
 }
 
 $error = "";
+$success = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $nama = trim($_POST['nama_layanan']);
-    $kategori = trim($_POST['kategori']);
-    $deskripsi = trim($_POST['deskripsi']);
-    $harga = filter_var($_POST['harga'], FILTER_VALIDATE_FLOAT);
 
-    if ($nama === "" || $kategori === "" || $deskripsi === "") {
-        $error = "Semua kolom wajib diisi.";
-    } elseif ($harga === false || $harga <= 0) {
-        $error = "Harga harus berupa angka lebih dari 0.";
+    $nama_layanan = trim($_POST['nama_layanan'] ?? '');
+    $kategori = trim($_POST['kategori'] ?? '');
+    $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $harga = $_POST['harga'] ?? '';
+    $status = $_POST['status'] ?? 'Aktif';
+
+    if (
+        $nama_layanan === '' ||
+        $kategori === '' ||
+        $deskripsi === '' ||
+        $harga === ''
+    ) {
+        $error = "Semua data harus diisi.";
     } else {
-        $user_id = $_SESSION['user_id'];
 
         $stmt = mysqli_prepare(
             $conn,
             "INSERT INTO services
-             (user_id, nama_layanan, kategori, deskripsi, harga)
-             VALUES (?, ?, ?, ?, ?)"
+            (user_id, nama_layanan, kategori, deskripsi, harga, status)
+            VALUES (?, ?, ?, ?, ?, ?)"
         );
 
         mysqli_stmt_bind_param(
             $stmt,
-            "isssd",
-            $user_id,
-            $nama,
+            "isssis",
+            $_SESSION['user_id'],
+            $nama_layanan,
             $kategori,
             $deskripsi,
-            $harga
+            $harga,
+            $status
         );
 
         if (mysqli_stmt_execute($stmt)) {
-            header("Location: services.php");
-            exit;
+            $success = "Jasa berhasil ditambahkan.";
         } else {
-            $error = "Gagal menambahkan jasa.";
+            $error = "Jasa gagal ditambahkan: " . mysqli_error($conn);
         }
     }
 }
@@ -51,54 +61,130 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Tambah Jasa</title>
-    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="../style.css">
 </head>
+
 <body>
 
 <header>
-    <div class="logo">E-Commerce Jasa</div>
+
+    <div class="logo">
+        E-Commerce Jasa
+    </div>
+
     <nav>
-        <a href="index.php">Beranda</a>
-        <a href="services.php">Katalog</a>
-        <a href="order_status.php">Pesanan</a>
-        <a href="profile.php">Profil</a>
+        <a href="dashboard.php">Dashboard</a>
+        <a href="manage.php">Kelola Jasa</a>
+        <a href="../index.php">Beranda</a>
+        <a href="../logout.php">Logout</a>
     </nav>
+
 </header>
 
-<div class="form-container">
-    <h2>Tambah Jasa</h2>
+<main class="container">
+
+    <h1 class="section-title">
+        Tambah Jasa
+    </h1>
 
     <?php if ($error): ?>
-        <div class="alert"><?= htmlspecialchars($error) ?></div>
+
+        <div class="alert">
+            <?= htmlspecialchars($error) ?>
+        </div>
+
     <?php endif; ?>
 
-    <form method="POST">
-        <label>Nama Jasa</label>
-        <input type="text" name="nama_layanan" required>
+    <?php if ($success): ?>
 
-        <label>Kategori</label>
-        <select name="kategori" required>
-            <option value="">Pilih kategori</option>
-            <option value="Desain Grafis">Desain Grafis</option>
-            <option value="Pemrograman">Pemrograman</option>
-            <option value="Pengetikan">Pengetikan</option>
-            <option value="Multimedia">Multimedia</option>
-            <option value="Pendidikan">Pendidikan</option>
-            <option value="Lainnya">Lainnya</option>
-        </select>
+        <div class="success">
+            <?= htmlspecialchars($success) ?>
+        </div>
 
-        <label>Deskripsi</label>
-        <textarea name="deskripsi" rows="5" required></textarea>
+    <?php endif; ?>
 
-        <label>Harga (Rp)</label>
-        <input type="number" name="harga" min="1" step="1" required>
+    <div class="form-container">
 
-        <button type="submit" class="btn full">Simpan Jasa</button>
-    </form>
-</div>
+        <form method="POST">
+
+            <label>Nama Jasa</label>
+
+            <input
+                type="text"
+                name="nama_layanan"
+                placeholder="Contoh: Pembuatan Website"
+                required
+            >
+
+            <label>Kategori</label>
+
+            <input
+                type="text"
+                name="kategori"
+                placeholder="Contoh: Pemrograman"
+                required
+            >
+
+            <label>Deskripsi</label>
+
+            <textarea
+                name="deskripsi"
+                rows="5"
+                placeholder="Masukkan deskripsi jasa"
+                required
+            ></textarea>
+
+            <label>Harga</label>
+
+            <input
+                type="number"
+                name="harga"
+                placeholder="Contoh: 150000"
+                min="0"
+                required
+            >
+
+            <label>Status</label>
+
+            <select name="status">
+
+                <option value="Aktif">
+                    Aktif
+                </option>
+
+                <option value="Nonaktif">
+                    Nonaktif
+                </option>
+
+            </select>
+
+            <button
+                type="submit"
+                class="btn full"
+            >
+                Tambah Jasa
+            </button>
+
+        </form>
+
+    </div>
+
+</main>
+
+<footer>
+
+    <p>
+        &copy; 2026 E-Commerce Jasa Kampus
+    </p>
+
+</footer>
 
 </body>
 </html>
